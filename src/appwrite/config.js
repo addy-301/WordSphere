@@ -1,23 +1,21 @@
-import conf from '../conf/conf';
+import conf from '../conf/conf.js';
 import { Client, ID, Databases, Storage, Query } from "appwrite";
 
-
 export class Service{
-    client=new Client();
+    client = new Client();
     databases;
     bucket;
-
+    
     constructor(){
         this.client
-            .setEndpoint(conf.appwriteUrl)
-            .setProject(conf.appwriteProjectId)
-        this.databases=new Databases(this.client);
-        this.bucket=new Storage(this.client);
+        .setEndpoint(conf.appwriteUrl)
+        .setProject(conf.appwriteProjectId);
+        this.databases = new Databases(this.client);
+        this.bucket = new Storage(this.client);
     }
 
     async createPost({title, slug, content, featuredImage, status, userId}){
-        // eslint-disable-next-line no-useless-catch
-        try{
+        try {
             return await this.databases.createDocument(
                 conf.appwriteDatabaseId,
                 conf.appwriteCollectionId,
@@ -29,16 +27,14 @@ export class Service{
                     status,
                     userId,
                 }
-            );
-        }
-        catch(error){
-            throw error;
+            )
+        } catch (error) {
+            console.log("Appwrite service :: createPost :: error", error);
         }
     }
 
     async updatePost(slug, {title, content, featuredImage, status}){
-        // eslint-disable-next-line no-useless-catch
-        try{
+        try {
             return await this.databases.updateDocument(
                 conf.appwriteDatabaseId,
                 conf.appwriteCollectionId,
@@ -48,81 +44,83 @@ export class Service{
                     content,
                     featuredImage,
                     status,
+
                 }
-            );
-        }
-        catch(error){
-            throw error;
+            )
+        } catch (error) {
+            console.log("Appwrite service :: updatePost :: error", error);
         }
     }
 
     async deletePost(slug){
-        // eslint-disable-next-line no-useless-catch
-        try{
+        try {
             await this.databases.deleteDocument(
                 conf.appwriteDatabaseId,
                 conf.appwriteCollectionId,
-                slug,
+                slug
+            
             )
-            return true;
+            return true
+        } catch (error) {
+            console.log("Appwrite service :: deletePost :: error", error);
+            return false
         }
-        catch(error){
-            throw error;
-        }
-    }    
+    }
 
     async getPost(slug){
-        // eslint-disable-next-line no-useless-catch
-        try{
+        try {
             return await this.databases.getDocument(
                 conf.appwriteDatabaseId,
                 conf.appwriteCollectionId,
                 slug
-            );
-        }
-        catch(error){
-            throw error;
+            
+            )
+        } catch (error) {
+            console.log("Appwrite service :: getPost :: error", error);
+            return false
         }
     }
 
-    async getPosts(queries=[Query.equal("status", "active")]){
-        // eslint-disable-next-line no-useless-catch
-        try{
+    async getPosts(queries = [Query.equal("status", "active")]){
+        try {
             return await this.databases.listDocuments(
                 conf.appwriteDatabaseId,
                 conf.appwriteCollectionId,
                 queries,
-            );
-        }
-        catch(error){
-            throw error;
+                
+
+            )
+        } catch (error) {
+            console.log("Appwrite service :: getPosts :: error", error);
+            return false
         }
     }
 
+    // file upload service
+
     async uploadFile(file){
-        // eslint-disable-next-line no-useless-catch
-        try{
+        try {
             return await this.bucket.createFile(
                 conf.appwriteBucketId,
                 ID.unique(),
                 file
-            );
-        }
-        catch(error){
-            throw error;
+            )
+        } catch (error) {
+            console.log("Appwrite service :: uploadFile :: error", error);
+            return false
         }
     }
 
     async deleteFile(fileId){
-        // eslint-disable-next-line no-useless-catch
-        try{
-            return await this.bucket.deleteFile(
+        try {
+            await this.bucket.deleteFile(
                 conf.appwriteBucketId,
                 fileId
             )
-        }
-        catch(error){
-            throw error;
+            return true
+        } catch (error) {
+            console.log("Appwrite service :: deleteFile :: error", error);
+            return false
         }
     }
 
@@ -130,11 +128,10 @@ export class Service{
         return this.bucket.getFilePreview(
             conf.appwriteBucketId,
             fileId
-        );
+        )
     }
-
 }
 
 
-const service=new Service();
-export default service;
+const service = new Service()
+export default service
